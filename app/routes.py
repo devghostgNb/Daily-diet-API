@@ -2,44 +2,61 @@ from flask import Blueprint, request, jsonify
 
 main = Blueprint("main", __name__)
 
-tasks = []
-task_id_counter = 1
+refeicoes = []
+refeicao_id_counter = 1
 
-@main.route("/tasks",  methods=["GET"])
-def get_tasks():
-    return jsonify(tasks)
+@main.route("/refeicoes",  methods=["GET"])
+def get_refeicoes():
+    return jsonify(refeicoes)
 
-@main.route("/tasks/<int:id>", methods=["GET"])
-def get_task(id):
-    for task in tasks:
-        if task["id"]==id:
-            return jsonify(task)
-    return {"error": "Task não encontrada."}, 404
+@main.route("/refeicoes/<int:id>", methods=["GET"])
+def get_refeicao(id):
+    for refeicao in refeicoes:
+        if refeicao["id"]==id:
+            return jsonify(refeicao)
+    return {"error": "Refeição não encontrada."}, 404
 
-@main.route("/tasks", methods=["POST"])
-def create_task():
-    global task_id_counter
+@main.route("/refeicoes", methods=["POST"])
+def create_refeicao():
+    global refeicao_id_counter
     data = request.json
+    if not data or "title" not in data or "descricao" not in data or "data_hora" not in data:
+        return jsonify ({"error":"Dados incompletos"}), 400
 
-    task = {
-        "id": task_id_counter,
+    refeicao = {
+        "id": refeicao_id_counter,
         "title": data.get("title"),
-        "done" : False
+        "descricao": data.get("descricao"),
+        "data_hora": data.get("data_hora")
         }
 
-    tasks.append(tasks)
-    task_id_counter += 1
-    return jsonify({"message": "Task criada", "data":data}), 201
+    refeicoes.append(refeicao)
+    refeicao_id_counter += 1
+    return jsonify({"message": "Refeição criada", "data":refeicao}), 201
 
-@main.route("/tasks/<int:id>", methods=["PUT"])
-def update_task(id):
+@main.route("/refeicoes/<int:id>", methods=["PUT"])
+def update_refeicao(id):
     data = request.get_json()
-    for task in tasks:
-         if task["id"]==id:
-            task["title"] = data.get("title", task["title"])
-            task["done"] = data.get("done", task["done"])
-            return jsonify(task)
-    return ("error": "Task não encontrada"), 404
+    if not data or "title" not in data or "descricao" not in data or "data_hora" not in data:
+        return jsonify ({"error":"Dados incompletos"}), 400
+    for refeicao in refeicoes:
+         if refeicao["id"]==id:
+            refeicao["title"] = data.get("title", refeicao["title"])
+            refeicao["descricao"] = data.get("descricao", refeicao["descricao"])
+            refeicao["data_hora"] = data.get("data_hora", refeicao["data_hora"])
+            return jsonify({"message": "Refeição atualizada com sucesso", "data":refeicao}), 200
+    return jsonify({"error": "Refeição não encontrada"}), 404
+
+@main.route("/refeicoes/<int:id>", methods=["DELETE"])
+def delete_refeicao(id):
+    for refeicao in refeicoes:
+        if refeicao["id"] == id:
+            refeicoes.remove(refeicao)
+            return jsonify({"message": "refeicao Deletada!"}), 200
+    return jsonify({"error": "Refeição não encontrada"}), 404
+
+
+
 
 
 
